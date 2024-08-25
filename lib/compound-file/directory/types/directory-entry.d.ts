@@ -1,4 +1,4 @@
-export interface Directory {
+export interface DirectoryEntry {
   /**
    * Directory Entry Name (64 bytes): This field MUST contain a Unicode string for the storage or
    * stream name encoded in UTF-16. The name MUST be terminated with a UTF-16 terminating null
@@ -75,7 +75,7 @@ export interface Directory {
    * -----------------------------------|-----------------------------------------------
    * 0x00000000000000000000000000000000 | No object class is associated with the storage.
    */
-  clsid: number,
+  clsid: (number | bigint)[],
 
   /**
    * State Bits (4 bytes): This field contains the user-defined flags if this entry is for a storage object or
@@ -101,7 +101,7 @@ export interface Directory {
    * --------------------|----------------------------------------------
    * 0x0000000000000000  | No creation time was recorded for the object.
    */
-  creationTime: number,
+  creationTime: bigint,
 
   /**
    * Modified Time (8 bytes): This field contains the modification time for a storage object, or all
@@ -114,8 +114,7 @@ export interface Directory {
    * --------------------|----------------------------------------------
    * 0x0000000000000000  | No modified time was recorded for the object.
    */
-  modifiedTime: number,
-
+  modifiedTime: bigint,
 
   /**
    * Starting Sector Location (4 bytes): This field contains the first sector location if this is a stream
@@ -129,5 +128,5 @@ export interface Directory {
    * a stream object. For a root storage object, this field contains the size of the mini stream. For a
    * storage object, this field MUST be set to all zeroes.
    */
-  streamSize: number
+  streamSize: bigint
 }
