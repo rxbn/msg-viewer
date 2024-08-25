@@ -1,21 +1,23 @@
 export interface Header {
   // Header Signature (8 bytes): Identification signature for the compound file structure, and MUST be set to the value 0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1.
-  signature: number[];  
+  signature: number[], 
 
   // Minor Version (2 bytes): Version number for nonbreaking changes. This field SHOULD be set to 0x003E if the major version field is either 0x0003 or 0x0004.
-  minorVersion: number;
+  minorVersion: number,
 
   // Major Version (2 bytes): Version number for breaking changes. This field MUST be set to either 0x0003 (version 3) or 0x0004 (version 4).
-  majorVersion: number;
+  majorVersion: number,
 
   // Byte Order (2 bytes): This field MUST be set to 0xFFFE. This field is a byte order mark for all integer fields, specifying little-endian byte order.
-  byteOrder: number; 
+  byteOrder: number,
 
-  // Sector Size (2 bytes): This field MUST be set to 0x0009, or 0x000c, depending on the Major Version field.
-  sectorSize: number;
+  // Sector Shift (2 bytes): This field MUST be set to 0x0009, or 0x000c, depending on the Major Version field.
+  // Sector Size = 2 ^ SectorShift. e.g. 2 ^ 9 = 512, 2 ^ 12 = 4096
+  sectorSize: number,
 
   // Mini Sector Shift (2 bytes): This field MUST be set to 0x0006. This field specifies the sector size of the Mini Stream as a power of 2. The sector size of the Mini Stream MUST be 64 bytes.
-  miniSectorShift: number; 
+  // Mini Sector Size = 2 ^ Mini Sector Shift. e.g. 2 ^ 6 = 64
+  miniSectorSize: number,
 
   // Number of Directory Sectors (4 bytes): This integer field contains the count of the number of directory sectors in the compound file.
   numberOfDirectorySectors: number,
@@ -72,7 +74,7 @@ export function getHeader(buffer: Buffer): Header {
   const sectorSize = Math.pow(2, buffer.readUInt16LE(offset));
   offset += 2;
 
-  const miniSectorShift = buffer.readUInt16LE(offset)
+  const miniSectorSize = Math.pow(2, buffer.readUInt16LE(offset));
   offset += 2;
 
   // Reserved (6 bytes): This field MUST be set to all zeroes. 
@@ -115,7 +117,7 @@ export function getHeader(buffer: Buffer): Header {
   }
 
   return {
-    signature, byteOrder, sectorSize, miniSectorShift, minorVersion, majorVersion, numberOfDirectorySectors, 
+    signature, byteOrder, sectorSize, miniSectorSize, minorVersion, majorVersion, numberOfDirectorySectors, 
     numberOfFatSectors, firstDirSectorLocation, transactionSignatureNumber, 
     miniStreamCutOffSize, firstMiniFatSectorLocation, numberOfMiniFatSectors,
     firstDifatSectorLocation, numberOfDifatSectors, difat
