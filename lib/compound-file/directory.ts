@@ -16,7 +16,6 @@ export function getDirectory(buffer: Buffer, header: Header, fat: number[]): Map
 
     for (let i = 0; i < entriesCount; i++) {
       const entry = directoryEntry(buffer, offset);
-      console.log(entry.entryName);
       entries.set(entry.entryName, entry);
       
       offset += entrySize;
