@@ -4,7 +4,12 @@ import { ObjectType } from "./directory/enums/object-type";
 import type { Header } from "./header";
 import { sectorToOffset } from "./util";
 
-export function getDirectory(buffer: Buffer, header: Header, fat: number[]): Map<string, DirectoryEntry> {
+export interface Directory {
+  entries: Map<string, DirectoryEntry>,
+  miniStreamLocations: number[]
+}
+
+export function getDirectory(buffer: Buffer, header: Header, fat: number[]): Directory {
   const entrySize = 128;
   const entriesCount = header.sectorSize / entrySize;
 
@@ -23,7 +28,21 @@ export function getDirectory(buffer: Buffer, header: Header, fat: number[]): Map
     }
   }
 
-  return entries;
+  return {
+    entries,
+    miniStreamLocations: getMiniStreamLocations(entries.get("Root Entry")!.startingSectorLocation, fat)
+  };
+}
+
+function getMiniStreamLocations(sector: number, fat: number[]): number[] {
+  const locations: number[] = [];
+
+  while(sector < 0xFFFFFFFE) {
+    locations.push(sector);
+    sector = fat[sector];
+  }
+
+  return locations;
 }
 
 function directoryEntry(buffer: Buffer, offset: number): DirectoryEntry {
