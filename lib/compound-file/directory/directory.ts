@@ -2,7 +2,7 @@ import { ColorFlag } from "./enums/color-flag";
 import type { DirectoryEntry } from "./types/directory-entry";
 import { ObjectType } from "./enums/object-type";
 import type { Header } from "../header";
-import { sectorOffset } from "../util";
+import { readGUID, sectorOffset } from "../util";
 
 export class Directory {
   constructor(
@@ -38,7 +38,7 @@ export class Directory {
   /** 
    * Traverses a Red-Black Tree to find the entry with the given name. 
    */
-  getSibling(name: string, root: number): DirectoryEntry | null {
+  get(name: string, root: number): DirectoryEntry | null {
     if (root < 0 || root >= this.entries.length) return null;
 
     const entry = this.entries[root];
@@ -46,9 +46,17 @@ export class Directory {
 
     const diff = this.compareName(name, entry.entryName);
 
-    if (diff < 0) return this.getSibling(name, entry.leftSiblingId);
-    if (diff > 0) return this.getSibling(name, entry.rightSiblingId);
-    return entry;
+    if (diff < 0) {
+      const left = this.get(name, entry.leftSiblingId);
+      if (left) return left;
+    }else if (diff > 0) {
+      const right = this.get(name, entry.rightSiblingId);
+      if (right) return right;
+    } else {
+      return entry;
+    }
+
+    return this.get(name, entry.childId);
   }
 
   private static getMiniStreamLocations(sector: number, fat: number[]): number[] {
@@ -82,7 +90,7 @@ export class Directory {
     const childId = buffer.readUInt32LE(offset);
     offset += 4;
     
-    const clsid = [buffer.readUInt32LE(offset), buffer.readUInt16LE(offset + 4), buffer.readUInt16LE(offset + 6), buffer.readBigUInt64LE(offset + 8)];
+    const clsid = readGUID(buffer, offset);
     offset += 16;
   
     const stateBits = buffer.readUInt32LE(offset);
