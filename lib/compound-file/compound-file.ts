@@ -1,8 +1,10 @@
 import { getDifat } from "./difat";
 import { Directory } from "./directory/directory";
+import type { DirectoryEntry } from "./directory/types/directory-entry";
 import { getFat } from "./fat";
 import { getHeader, type Header } from "./header";
 import { getMiniFat } from "./mini-fat";
+import { streamSectorOffset } from "./util";
 
 export class CompoundFile {
   constructor(
@@ -21,6 +23,18 @@ export class CompoundFile {
     const miniFat = getMiniFat(buffer, header, fat);
     const directory = Directory.getDirectory(buffer, header, fat);
     return new CompoundFile(buffer, header, difat, fat, miniFat, directory);
+  }
+
+  readStream(entry: DirectoryEntry, action: (sectorSize: number, offset: number) => void) {
+    const sectorSize = entry.streamSize < this.header.miniStreamCutOffSize ? this.header.miniSectorSize : this.header.sectorSize;
+    const fat = entry.streamSize < this.header.miniStreamCutOffSize ? this.miniFat : this.fat;
+    let sector = entry.startingSectorLocation;
+  
+    while (sector < 0xFFFFFFFE) {
+      let offset = streamSectorOffset(sector, this.header, entry.streamSize, this.directory.miniStreamLocations);
+      action(sectorSize, offset);
+      sector = fat[sector];
+    }
   }
 
   toString(): string {
