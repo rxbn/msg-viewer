@@ -1,11 +1,27 @@
 import type { Header } from "./header";
 
-export function sectorToOffset(sector: number, sectorSize: number): number {
+/**
+ * Based on a non-stream sector number returns the byte offset in the Buffer.
+ */
+export function sectorOffset(sector: number, sectorSize: number): number {
   return (sector + 1) * sectorSize;
 }
 
-export function sectorToMiniStreamOffset(sector: number): number {
-  return sector * 64;
+/**
+ * Based on a stream sector number returns the byte offset in the Buffer.
+ */
+export function streamSectorOffset(sector: number, header: Header, streamSize: bigint, miniStreamLocations: number[]): number {
+  let offset = sectorOffset(sector, header.sectorSize);
+  
+  // Calculates the offset in ministream if streamSize is smaller than miniStreamCutOffSize
+  if (streamSize < header.miniStreamCutOffSize) {
+    offset = sector * header.miniSectorSize;
+    const miniStreamSector = Math.floor(offset / header.sectorSize);
+    const offsetInMiniStream = offset % header.sectorSize;
+    offset = sectorOffset(miniStreamLocations[miniStreamSector], header.sectorSize) + offsetInMiniStream;
+  }
+
+  return offset;
 }
 
 export function fatSectorSize(header: Header) {

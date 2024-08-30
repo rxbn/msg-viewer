@@ -1,5 +1,5 @@
 import type { Header } from "./header";
-import { sectorToOffset } from "./util";
+import { sectorOffset } from "./util";
 
 /**
  * Returns an array of FAT Sector Locations which specify the FAT sector number.
@@ -15,7 +15,7 @@ export function getDifat(buffer: Buffer, header: Header): number[] {
   // Next DIFAT Sector Location (4 bytes): This field specifies the next sector number in the DIFAT chain of sectors. The first DIFAT sector is specified in the Header. The last DIFAT sector MUST set this field to ENDOFCHAIN (0xFFFFFFFE).
   let sector = header.firstDifatSectorLocation;
   while (sector < 0xFFFFFFFE) {
-    let offset = sectorToOffset(sector, header.sectorSize);
+    let offset = sectorOffset(sector, header.sectorSize);
     
     for (let i = 0; i < fatNumber; i++) {
       if (buffer.readUInt32LE(offset) == 0xFFFFFFFF) {

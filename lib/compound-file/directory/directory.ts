@@ -2,7 +2,7 @@ import { ColorFlag } from "./enums/color-flag";
 import type { DirectoryEntry } from "./types/directory-entry";
 import { ObjectType } from "./enums/object-type";
 import type { Header } from "../header";
-import { sectorToOffset } from "../util";
+import { sectorOffset } from "../util";
 
 export class Directory {
   constructor(
@@ -18,7 +18,7 @@ export class Directory {
   
     let sector = header.firstDirSectorLocation;
     while (sector < 0xFFFFFFFE) {
-      let offset = sectorToOffset(sector, header.sectorSize);
+      let offset = sectorOffset(sector, header.sectorSize);
   
       for (let i = 0; i < entriesCount; i++) {
         entries.push(this.directoryEntry(buffer, offset));
@@ -118,10 +118,14 @@ export class Directory {
   }
   
   print() {
-    this.traverse(0, 0, (entry, depth) => console.log("\t".repeat(depth), entry.entryName));
+    this.traverse((entry, depth) => console.log("\t".repeat(depth), entry.entryName));
   }
 
-  traverse(root: number, depth: number, action: (entry: DirectoryEntry, depth: number) => void) {
+  traverse(action: (entry: DirectoryEntry, depth: number) => void) {
+    this.traverseFromRoot(0, 0, action);
+  }
+
+  private traverseFromRoot(root: number, depth: number, action: (entry: DirectoryEntry, depth: number) => void) {
     if (root < 0 || root >= this.entries.length) return;
 
     const entry = this.entries[root];
@@ -129,9 +133,9 @@ export class Directory {
 
     action(entry, depth);
 
-    this.traverse(entry.leftSiblingId, depth, action);
-    this.traverse(entry.rightSiblingId, depth, action);
-    this.traverse(entry.childId, depth + 1, action);
+    this.traverseFromRoot(entry.leftSiblingId, depth, action);
+    this.traverseFromRoot(entry.rightSiblingId, depth, action);
+    this.traverseFromRoot(entry.childId, depth + 1, action);
   }
 
   private compareName(name1: string, name2: string) {

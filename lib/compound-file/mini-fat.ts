@@ -1,5 +1,5 @@
 import type { Header } from "./header";
-import { fatSectorSize, sectorToOffset } from "./util";
+import { fatSectorSize, sectorOffset } from "./util";
 
 /**
  * The mini FAT is used to allocate space in the mini stream. The mini stream is divided into smaller,
@@ -13,7 +13,7 @@ export function getMiniFat(buffer: Buffer, header: Header, fat: number[]): numbe
     
   let sector = header.firstMiniFatSectorLocation;
   while (sector < 0xFFFFFFFE) {
-    let offset = sectorToOffset(sector, header.sectorSize);
+    let offset = sectorOffset(sector, header.sectorSize);
     for (let i = 0; i < sectorSize; i++) {
       miniFat.push(buffer.readUInt32LE(offset));
       offset += 4;

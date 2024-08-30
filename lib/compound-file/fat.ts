@@ -1,5 +1,5 @@
 import type { Header } from "./header";
-import { fatSectorSize, sectorToOffset } from "./util";
+import { fatSectorSize, sectorOffset } from "./util";
 
 /**
  * The FAT is an array of sector numbers that represent the allocation of space within the file, grouped
@@ -11,7 +11,7 @@ export function getFat(buffer: Buffer, header: Header, difat: number[]): number[
 
   const fat: number[] = [];
   for (let i = 0; i < difat.length; i++) {
-    let offset = sectorToOffset(difat[i], header.sectorSize);
+    let offset = sectorOffset(difat[i], header.sectorSize);
     
     for (let j = 0; j < sectorSize; j++) {
       const nextSector = buffer.readUInt32LE(offset);
