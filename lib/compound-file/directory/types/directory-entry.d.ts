@@ -75,7 +75,7 @@ export interface DirectoryEntry {
    * -----------------------------------|-----------------------------------------------
    * 0x00000000000000000000000000000000 | No object class is associated with the storage.
    */
-  clsid: (number | bigint)[],
+  clsid: string,
 
   /**
    * State Bits (4 bytes): This field contains the user-defined flags if this entry is for a storage object or
