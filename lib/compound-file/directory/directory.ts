@@ -6,7 +6,9 @@ import { sectorToOffset } from "../util";
 
 export interface Directory {
   entries: DirectoryEntry[],
-  miniStreamLocations: number[]
+  miniStreamLocations: number[],
+  /** Traverses a Red-Black Tree to find the entry with the given name. */
+  getSibling: (name: string, root: number) => DirectoryEntry | null
 }
 
 export function getDirectory(buffer: Buffer, header: Header, fat: number[]): Directory {
@@ -30,8 +32,24 @@ export function getDirectory(buffer: Buffer, header: Header, fat: number[]): Dir
 
   return {
     entries,
-    miniStreamLocations: getMiniStreamLocations(entries[0].startingSectorLocation, fat)
+    miniStreamLocations: getMiniStreamLocations(entries[0].startingSectorLocation, fat),
+    getSibling(name: string, root: number) {
+      const entry = entries[root];
+      if (!entry) return null;
+
+      const diff = compareName(name, entry.entryName);
+
+      if (diff < 0) return this.getSibling(name, entry.leftSiblingId);
+      if (diff > 0) return this.getSibling(name, entry.rightSiblingId);
+      return entry;
+    }
   };
+}
+
+function compareName(name1: string, name2: string) {
+  if (name1.length < name2.length) return -1;
+  if (name1.length > name2.length) return 1;
+  return name1.localeCompare(name2);
 }
 
 function getMiniStreamLocations(sector: number, fat: number[]): number[] {
