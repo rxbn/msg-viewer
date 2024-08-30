@@ -1,11 +1,11 @@
-import { ColorFlag } from "./directory/enums/color-flag";
-import type { DirectoryEntry } from "./directory/types/directory-entry";
-import { ObjectType } from "./directory/enums/object-type";
-import type { Header } from "./header";
-import { sectorToOffset } from "./util";
+import { ColorFlag } from "./enums/color-flag";
+import type { DirectoryEntry } from "./types/directory-entry";
+import { ObjectType } from "./enums/object-type";
+import type { Header } from "../header";
+import { sectorToOffset } from "../util";
 
 export interface Directory {
-  entries: Map<string, DirectoryEntry>,
+  entries: DirectoryEntry[],
   miniStreamLocations: number[]
 }
 
@@ -13,24 +13,24 @@ export function getDirectory(buffer: Buffer, header: Header, fat: number[]): Dir
   const entrySize = 128;
   const entriesCount = header.sectorSize / entrySize;
 
-  const entries: Map<string, DirectoryEntry> = new Map();
+  const entries: DirectoryEntry[] = [];
 
   let sector = header.firstDirSectorLocation;
   while (sector < 0xFFFFFFFE) {
     let offset = sectorToOffset(sector, header.sectorSize);
 
     for (let i = 0; i < entriesCount; i++) {
-      const entry = directoryEntry(buffer, offset);
-      entries.set(entry.entryName, entry);
+      entries.push(directoryEntry(buffer, offset));
       
       offset += entrySize;
-      sector = fat[sector];
     }
+
+    sector = fat[sector];
   }
 
   return {
     entries,
-    miniStreamLocations: getMiniStreamLocations(entries.get("Root Entry")!.startingSectorLocation, fat)
+    miniStreamLocations: getMiniStreamLocations(entries[0].startingSectorLocation, fat)
   };
 }
 
