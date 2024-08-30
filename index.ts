@@ -1,9 +1,10 @@
 import { CompoundFile } from './lib/compound-file/compound-file'
 
-const file = Bun.file(`resources/inputs/${Bun.argv[2]}.msg`);
+const filePath = (folder: string) => `resources/${folder}/${Bun.argv[2]}.msg`;
+const file = Bun.file(filePath("inputs"));
 
 file.arrayBuffer().then((arrayBuffer) => {
   const buffer = Buffer.from(arrayBuffer);
   const compoundFile = CompoundFile.create(buffer);
-  Bun.write("resources/outputs/out.json", compoundFile.toString());
+  Bun.write(filePath("outputs"), compoundFile.toString());
 });
