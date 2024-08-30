@@ -29,3 +29,13 @@ export function fatSectorSize(header: Header) {
   // If Header Major Version is 4, there MUST be 1,024 fields specified to fill a 4,096-byte sector.
   return header.majorVersion == 3 ? 128 : 1024;
 }
+
+export function readGUID(buffer: Buffer, offset: number): string {
+  return [
+    buffer.toString("hex", offset, offset + 2).padStart(8, '0'),
+    buffer.toString("hex", offset + 2, offset + 3).padStart(4, '0'),
+    buffer.toString("hex", offset + 3, offset + 4).padStart(4, '0'), 
+    buffer.toString("hex", offset + 4, offset + 5).padStart(4, '0'), 
+    buffer.toString('hex', offset + 5, offset + 11).padStart(12, '0')
+  ].join("-");
+}
