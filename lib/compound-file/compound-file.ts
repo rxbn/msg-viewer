@@ -25,16 +25,46 @@ export class CompoundFile {
     return new CompoundFile(buffer, header, difat, fat, miniFat, directory);
   }
 
-  readStream(entry: DirectoryEntry, action: (sectorSize: number, offset: number) => void) {
-    const sectorSize = entry.streamSize < this.header.miniStreamCutOffSize ? this.header.miniSectorSize : this.header.sectorSize;
-    const fat = entry.streamSize < this.header.miniStreamCutOffSize ? this.miniFat : this.fat;
-    let sector = entry.startingSectorLocation;
-  
-    while (sector < 0xFFFFFFFE) {
-      let offset = streamSectorOffset(sector, this.header, entry.streamSize, this.directory.miniStreamLocations);
-      action(sectorSize, offset);
-      sector = fat[sector];
+  readStream<THeader, TDataEntry>(
+    entry: DirectoryEntry, 
+    getDataAction: (offset: number) => [TDataEntry, number], 
+    getHeaderAction?: (offset: number) => [THeader, number]
+  ): [THeader | undefined, TDataEntry[]] {
+    let sectorSize = this.header.sectorSize;
+    let fat = this.fat;
+    
+    if (entry.streamSize < this.header.miniStreamCutOffSize) {
+      sectorSize = this.header.miniSectorSize;
+      fat = this.miniFat;
     }
+
+    let sector = entry.startingSectorLocation;
+    if (sector >= 0xFFFFFFFE) return [undefined, []];
+  
+    let offset = streamSectorOffset(sector, this.header, entry.streamSize, this.directory.miniStreamLocations);
+    let initialOffset = offset;
+
+    const [header, headerSize] = getHeaderAction ? getHeaderAction(offset) : [undefined, 0];
+    offset += headerSize;
+
+    const entriesCount = (entry.streamSize - BigInt(headerSize)) / BigInt(sectorSize);
+
+    const data: TDataEntry[] = [];
+    for (let i = 0; i < entriesCount; i++) {
+      if (offset - initialOffset >= sectorSize) {
+        sector = fat[sector];
+        if (sector >= 0xFFFFFFFE) break;
+  
+        offset = streamSectorOffset(sector, this.header, entry.streamSize, this.directory.miniStreamLocations);
+        initialOffset = offset;
+      }
+  
+      const [dataEntry, size] = getDataAction(offset);
+      data.push(dataEntry);
+      offset += size;
+    }
+
+    return [header, data];
   }
 
   toString(): string {
