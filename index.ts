@@ -1,14 +1,11 @@
-import { CompoundFile } from './lib/compound-file/compound-file'
-import { getGUIDs } from './lib/msg/properties/streams/guid-stream';
+import { parse } from './lib/msg/msg-parser';
 
-const filePath = (folder: string) => `resources/${folder}/${Bun.argv[2]}.msg`;
-const file = Bun.file(filePath("inputs"));
+const filePath = (folder: string, type: string) => `resources/${folder}/${Bun.argv[2]}.${type}`;
+const file = Bun.file(filePath("inputs", "msg"));
 
 file.arrayBuffer().then((arrayBuffer) => {
-  const buffer = Buffer.from(arrayBuffer);
-  const compoundFile = CompoundFile.create(buffer);
-  Bun.write(filePath("outputs"), compoundFile.toString());
-
-  const guids = getGUIDs(compoundFile);
-  console.log("guids", guids)
+  const startTime = performance.now();
+  const message = parse(Buffer.from(arrayBuffer));
+  Bun.write(filePath("outputs", "json"), JSON.stringify(message, null, "  "));
+  console.log(`Took: ${( performance.now() - startTime)} ms`);
 });
