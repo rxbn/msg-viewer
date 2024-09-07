@@ -17,8 +17,8 @@ export function streamSectorOffset(sector: number, header: Header, streamSize: b
   if (streamSize < header.miniStreamCutOffSize) {
     offset = sector * header.miniSectorSize;
     const miniStreamSector = Math.floor(offset / header.sectorSize);
-    const offsetInMiniStream = offset % header.sectorSize;
-    offset = sectorOffset(miniStreamLocations[miniStreamSector], header.sectorSize) + offsetInMiniStream;
+    const miniStreamOffset = offset % header.sectorSize;
+    offset = sectorOffset(miniStreamLocations[miniStreamSector], header.sectorSize) + miniStreamOffset ;
   }
 
   return offset;

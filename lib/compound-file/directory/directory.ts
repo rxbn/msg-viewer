@@ -149,6 +149,6 @@ export class Directory {
   private compareName(name1: string, name2: string) {
     if (name1.length < name2.length) return -1;
     if (name1.length > name2.length) return 1;
-    return name1.localeCompare(name2);
+    return name1.toUpperCase().localeCompare(name2.toUpperCase());
   }
 }

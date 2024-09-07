@@ -25,11 +25,15 @@ export class CompoundFile {
     return new CompoundFile(buffer, header, difat, fat, miniFat, directory);
   }
 
-  readStream<THeader, TDataEntry>(
-    entry: DirectoryEntry, 
-    getDataAction: (offset: number) => [TDataEntry, number], 
-    getHeaderAction?: (offset: number) => [THeader, number]
-  ): [THeader | undefined, TDataEntry[]] {
+  readStream(
+    entry: DirectoryEntry,
+    getDataAction: (offset: number, bytesToRead: number) => void,
+    entrySize?: number,
+    getHeaderAction?: (offset: number) => number
+  ) {
+    let sector = entry.startingSectorLocation;
+    if (sector >= 0xFFFFFFFE) return;
+
     let sectorSize = this.header.sectorSize;
     let fat = this.fat;
     
@@ -37,20 +41,16 @@ export class CompoundFile {
       sectorSize = this.header.miniSectorSize;
       fat = this.miniFat;
     }
-
-    let sector = entry.startingSectorLocation;
-    if (sector >= 0xFFFFFFFE) return [undefined, []];
   
     let offset = streamSectorOffset(sector, this.header, entry.streamSize, this.directory.miniStreamLocations);
     let initialOffset = offset;
 
-    const [header, headerSize] = getHeaderAction ? getHeaderAction(offset) : [undefined, 0];
+    const headerSize = getHeaderAction ? getHeaderAction(offset) : 0;
+    let streamSize = entry.streamSize - BigInt(headerSize);
     offset += headerSize;
+    entrySize = entrySize ?? Math.min(Number(streamSize), this.header.miniSectorSize);
 
-    const entriesCount = (entry.streamSize - BigInt(headerSize)) / BigInt(sectorSize);
-
-    const data: TDataEntry[] = [];
-    for (let i = 0; i < entriesCount; i++) {
+    while(streamSize > 0) {
       if (offset - initialOffset >= sectorSize) {
         sector = fat[sector];
         if (sector >= 0xFFFFFFFE) break;
@@ -59,12 +59,12 @@ export class CompoundFile {
         initialOffset = offset;
       }
   
-      const [dataEntry, size] = getDataAction(offset);
-      data.push(dataEntry);
-      offset += size;
-    }
+      let bytes = Math.min(entrySize, Number(streamSize));
+      getDataAction(offset, bytes);
 
-    return [header, data];
+      streamSize -= BigInt(bytes);
+      offset += bytes;
+    }
   }
 
   toString(): string {

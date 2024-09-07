@@ -1,6 +1,6 @@
-import type { CompoundFile } from "../../../../compound-file/compound-file";
-import type { DirectoryEntry } from "../../../../compound-file/directory/types/directory-entry";
-import { PROPERTY_TYPES } from "../../property-types";
+import type { CompoundFile } from "../../../compound-file/compound-file";
+import type { DirectoryEntry } from "../../../compound-file/directory/types/directory-entry";
+import { PROPERTY_TYPES } from "./property-types";
 import type { PropertyHeader } from "./types/property-header";
 import type { PropertyData } from "./types/property-data";
 import type { PropertyStreamEntry } from "./types/property-stream-entry";
@@ -12,12 +12,14 @@ export function getPropertyStreamEntry(file: CompoundFile, folder: DirectoryEntr
   const entry = file.directory.get(STREAM_NAME, folder.childId);
   if (!entry) return null;
 
-  const [header, data] = file.readStream<PropertyHeader, PropertyData>(
-    entry, 
-    (offset) => [getProperty(file.buffer, offset), DATA_SIZE],
+  let header;
+  const data: PropertyData[] = [];
+  file.readStream(entry,
+    (offset) => data.push(getProperty(file.buffer, offset)),
+    DATA_SIZE,
     (offset) => {
-      const header = getHeader(file.buffer, offset, folder.entryName);
-      return [header, header.size]
+      header = getHeader(file.buffer, offset, folder.entryName);
+      return header.size;
     }
   );
 
