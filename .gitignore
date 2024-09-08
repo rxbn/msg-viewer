@@ -176,3 +176,6 @@ dist
 
 # Contains input and output resources
 /resources
+
+# Contains built logic
+/build
