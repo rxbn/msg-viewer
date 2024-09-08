@@ -38,7 +38,7 @@ export class Directory {
   /** 
    * Traverses a Red-Black Tree to find the entry with the given name. 
    */
-  get(name: string, root: number): DirectoryEntry | null {
+  get(name: string, root: number, deep: boolean): DirectoryEntry | null {
     if (root < 0 || root >= this.entries.length) return null;
 
     const entry = this.entries[root];
@@ -47,16 +47,16 @@ export class Directory {
     const diff = this.compareName(name, entry.entryName);
 
     if (diff < 0) {
-      const left = this.get(name, entry.leftSiblingId);
+      const left = this.get(name, entry.leftSiblingId, deep);
       if (left) return left;
     }else if (diff > 0) {
-      const right = this.get(name, entry.rightSiblingId);
+      const right = this.get(name, entry.rightSiblingId, deep);
       if (right) return right;
     } else {
       return entry;
     }
 
-    return this.get(name, entry.childId);
+    return deep ? this.get(name, entry.childId, deep) : null;
   }
 
   private static getMiniStreamLocations(sector: number, fat: number[]): number[] {
@@ -139,10 +139,10 @@ export class Directory {
     const entry = this.entries[root];
     if (!entry) return;
 
-    action(entry, depth);
-
     this.traverseFromRoot(entry.leftSiblingId, depth, action);
     this.traverseFromRoot(entry.rightSiblingId, depth, action);
+    
+    action(entry, depth);
     this.traverseFromRoot(entry.childId, depth + 1, action);
   }
 

@@ -1,29 +1,66 @@
 import { CompoundFile } from "../compound-file/compound-file";
-import { ROOT_PROPERTIES } from "./streams/property/properties";
-import { getPropertyStreamEntry } from "./streams/property/property-stream";
-import type { Message, MessageContent } from "./types/message";
+import type { DirectoryEntry } from "../compound-file/directory/types/directory-entry";
+import { ATTACH_PROPERTIES, RECIP_PROPERTIES, ROOT_PROPERTIES, type Property } from "./streams/property/properties";
+import { PtypBinary, PtypString, type PropertyType } from "./streams/property/property-types";
+import type { Attachment, Message, MessageContent, Recipient } from "./types/message";
 
 export function parse(buffer: Buffer): Message {
   const file = CompoundFile.create(buffer);
-  const rootProperties = getPropertyStreamEntry(file, file.directory.entries[0]);
+  return { 
+    content: getContent(file), 
+    attachments: getAttachments(file), 
+    recipients: getRecipients(file),
+  };
+}
 
-  const content = rootProperties!.data.reduce((acc, data) => {
-    const propertyName = ROOT_PROPERTIES[data.propertyId];
-    if (!propertyName) return acc;
+function getContent(file: CompoundFile): MessageContent {
+  return getValue(file, ROOT_PROPERTIES, file.directory.entries[0]);
+}
 
-    const streamName = "__substg1.0_" + data.propertyId.toString(16).padStart(4, "0") + data.propertyType.id.toString(16).padStart(4, "0");
-    const entry = file.directory.get(streamName, file.directory.entries[0].childId);
+function getRecipients(file: CompoundFile): Recipient[] {
+  return getValues(file, RECIP_PROPERTIES, "recip");
+}
+
+function getAttachments(file: CompoundFile): Attachment[] {
+  return getValues(file, ATTACH_PROPERTIES, "attach");
+}
+
+function getValues<T>(file: CompoundFile, properties: Property[], prefix: string): T[] {
+  const list: T[] = [];
+
+  for (let i = 0; i < 2048; i++) {
+    const directory = file.directory.get(`__${prefix}_version1.0_#${i.toString(16).padStart(8, "0")}`, file.directory.entries[0].childId, false);
+    if (!directory) break;
+    list.push(getValue(file, properties, directory));
+  }
+
+  return list;
+}
+
+function getValue<T>(file: CompoundFile, properties: Property[], dir: DirectoryEntry): T {
+  return properties.reduce((acc, p) => {
+    const streamName = `__substg1.0_${p.id.padStart(4, "0")}${p.type.id.toString(16).padStart(4, "0")}`;
+    const entry = file.directory.get(streamName, dir.childId, false);
     if (!entry) return acc;
 
-    let propertyValue = "";
-    file.readStream(entry, (offset, bytes) => {
-      propertyValue += file.buffer.toString("utf16le", offset, offset + bytes);
-    });
-
-    acc[propertyName as keyof MessageContent] = propertyValue;
+    acc[p.name as keyof T] = getValueForType(file, entry, p.type) as T[keyof T];
 
     return acc;
-  }, {} as MessageContent);
+  }, {} as T);
+}
 
-  return { content: content, attachments: [], recipients: [] };
+function getValueForType(file: CompoundFile, entry: DirectoryEntry, type: PropertyType)  {
+  switch (type) {
+    case PtypString: {
+      let value = "";
+      file.readStream(entry, (offset, bytes) => value += file.buffer.toString("utf16le", offset, offset + bytes));
+      return value;
+    };
+    case PtypBinary: {
+      const chunks: Buffer[] = [];
+      file.readStream(entry, (offset, bytes) => chunks.push(file.buffer.subarray(offset, offset + bytes)));
+      return Buffer.concat(chunks);
+    };
+    default: return null;
+  };
 }

@@ -9,7 +9,7 @@ const STREAM_NAME = "__properties_version1.0";
 const DATA_SIZE = 16;
 
 export function getPropertyStreamEntry(file: CompoundFile, folder: DirectoryEntry): PropertyStreamEntry | null {
-  const entry = file.directory.get(STREAM_NAME, folder.childId);
+  const entry = file.directory.get(STREAM_NAME, folder.childId, false);
   if (!entry) return null;
 
   let header;
@@ -36,14 +36,14 @@ function getProperty(buffer: Buffer, offset: number): PropertyData {
   const flags = buffer.readUInt32LE(offset);
   offset += 4;
 
-  const valueOrSize = (!propertyType.size || propertyType.multi)
+  const valueOrSize = (!propertyType?.size || propertyType?.multi)
     ? buffer.readUInt32LE(offset)
     : buffer.toString("hex", offset, offset + propertyType.size);  
   
   return {
     propertyType,
     propertyId,
-    flags,
+    flags,  
     valueOrSize
   };
 }

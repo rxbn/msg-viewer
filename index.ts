@@ -6,6 +6,6 @@ const file = Bun.file(filePath("inputs", "msg"));
 file.arrayBuffer().then((arrayBuffer) => {
   const startTime = performance.now();
   const message = parse(Buffer.from(arrayBuffer));
-  Bun.write(filePath("outputs", "json"), JSON.stringify(message, null, "  "));
   console.log(`Took: ${( performance.now() - startTime)} ms`);
+  console.log(message);
 });

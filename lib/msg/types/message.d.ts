@@ -10,15 +10,17 @@ export interface MessageContent {
   senderEmail: string,
   body: string,
   bodyHTML: string,
-  // bodyRTF: string,
+  bodyRTF: Buffer,
   headers: string,
 }
 
 export interface Attachment {
   extension: string,
-  fileNameShort: string,
   fileName: string, 
   mimeType: string,
+  language: string,
+  displayName: string,
+  content: Buffer
 }
 
 export interface Recipient {
