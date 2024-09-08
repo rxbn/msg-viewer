@@ -51,10 +51,10 @@ export interface Header {
   difat: number[]
 }
 
-export function getHeader(buffer: Buffer): Header {
+export function getHeader(view: DataView): Header {
   const signature = [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1];
   for (var offset = 0; offset < 8; offset++) {
-    if (buffer.readUInt8(offset) != signature[offset]) {
+    if (view.getUint8(offset) != signature[offset]) {
       throw new Error("Signature mismatch!"); 
     }
   }
@@ -62,54 +62,54 @@ export function getHeader(buffer: Buffer): Header {
   // Header CLSID (16 bytes): Reserved and unused class ID that MUST be set to all zeroes 
   offset += 16;
 
-  const minorVersion = buffer.readUInt16LE(offset);
+  const minorVersion = view.getUint16(offset, true);
   offset += 2;
 
-  const majorVersion = buffer.readUInt16LE(offset);
+  const majorVersion = view.getUint16(offset, true);
   offset += 2;
 
-  const byteOrder = buffer.readUInt16LE(offset);
+  const byteOrder = view.getUint16(offset, true);
   offset += 2;
 
-  const sectorSize = Math.pow(2, buffer.readUInt16LE(offset));
+  const sectorSize = Math.pow(2, view.getUint16(offset, true));
   offset += 2;
 
-  const miniSectorSize = Math.pow(2, buffer.readUInt16LE(offset));
+  const miniSectorSize = Math.pow(2, view.getUint16(offset, true));
   offset += 2;
 
   // Reserved (6 bytes): This field MUST be set to all zeroes. 
   offset += 6;
   
-  const numberOfDirectorySectors = buffer.readUInt32LE(offset)
+  const numberOfDirectorySectors = view.getUint32(offset, true)
   offset += 4;
 
-  const numberOfFatSectors = buffer.readUInt32LE(offset)
+  const numberOfFatSectors = view.getUint32(offset, true)
   offset += 4;
 
-  const firstDirSectorLocation = buffer.readUInt32LE(offset);
+  const firstDirSectorLocation = view.getUint32(offset, true);
   offset += 4;
 
-  const transactionSignatureNumber = buffer.readUInt32LE(offset);
+  const transactionSignatureNumber = view.getUint32(offset, true);
   offset += 4;
   
-  const miniStreamCutOffSize = buffer.readUInt32LE(offset);
+  const miniStreamCutOffSize = view.getUint32(offset, true);
   offset += 4;
 
-  const firstMiniFatSectorLocation = buffer.readUInt32LE(offset);
+  const firstMiniFatSectorLocation = view.getUint32(offset, true);
   offset += 4;
 
-  const numberOfMiniFatSectors = buffer.readUInt32LE(offset)
+  const numberOfMiniFatSectors = view.getUint32(offset, true)
   offset += 4;
   
-  const firstDifatSectorLocation = buffer.readUInt32LE(offset)
+  const firstDifatSectorLocation = view.getUint32(offset, true)
   offset += 4;
     
-  const numberOfDifatSectors = buffer.readUInt32LE(offset);
+  const numberOfDifatSectors = view.getUint32(offset, true);
   offset += 4;
 
   const difat: number[] = [];
   for (let i = 0; i < 436; i += 4) {
-    const fat = buffer.readUInt32LE(offset);
+    const fat = view.getUint32(offset, true);
     if (fat == 0xFFFFFFFF || fat == 0) break;
     
     difat.push(fat);

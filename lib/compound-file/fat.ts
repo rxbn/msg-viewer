@@ -6,7 +6,7 @@ import { fatSectorSize, sectorOffset } from "./util";
  * into FAT sectors. Each stream is represented in the FAT by a sector chain, in much the same fashion 
  * as a FAT file system.
  */
-export function getFat(buffer: Buffer, header: Header, difat: number[]): number[] {
+export function getFat(view: DataView, header: Header, difat: number[]): number[] {
   const sectorSize = fatSectorSize(header);
 
   const fat: number[] = [];
@@ -14,7 +14,7 @@ export function getFat(buffer: Buffer, header: Header, difat: number[]): number[
     let offset = sectorOffset(difat[i], header.sectorSize);
     
     for (let j = 0; j < sectorSize; j++) {
-      const nextSector = buffer.readUInt32LE(offset);
+      const nextSector = view.getUint32(offset, true);
       fat.push(nextSector);
       offset += 4;
     }

@@ -6,7 +6,7 @@ import { fatSectorSize, sectorOffset } from "./util";
  * equal-length sectors, and the sector size that is used for the mini stream is specified from the
  * Compound File Header (64 bytes).
  */
-export function getMiniFat(buffer: Buffer, header: Header, fat: number[]): number[] {   
+export function getMiniFat(view: DataView, header: Header, fat: number[]): number[] {   
   const sectorSize = fatSectorSize(header);
 
   const miniFat = [];
@@ -15,7 +15,7 @@ export function getMiniFat(buffer: Buffer, header: Header, fat: number[]): numbe
   while (sector < 0xFFFFFFFE) {
     let offset = sectorOffset(sector, header.sectorSize);
     for (let i = 0; i < sectorSize; i++) {
-      miniFat.push(buffer.readUInt32LE(offset));
+      miniFat.push(view.getUint32(offset, true));
       offset += 4;
     }
 

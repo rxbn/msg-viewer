@@ -2,7 +2,8 @@ import { ColorFlag } from "./enums/color-flag";
 import type { DirectoryEntry } from "./types/directory-entry";
 import { ObjectType } from "./enums/object-type";
 import type { Header } from "../header";
-import { readGUID, sectorOffset } from "../util";
+import { sectorOffset } from "../util";
+import { TEXT_DECODER } from "../constants/text-decoder";
 
 export class Directory {
   constructor(
@@ -10,7 +11,7 @@ export class Directory {
     public readonly miniStreamLocations: number[]
   ) {}
 
-  static getDirectory(buffer: Buffer, header: Header, fat: number[]): Directory {
+  static getDirectory(view: DataView, header: Header, fat: number[]): Directory {
     const entrySize = 128;
     const entriesCount = header.sectorSize / entrySize;
   
@@ -21,7 +22,7 @@ export class Directory {
       let offset = sectorOffset(sector, header.sectorSize);
   
       for (let i = 0; i < entriesCount; i++) {
-        entries.push(this.directoryEntry(buffer, offset));
+        entries.push(this.directoryEntry(view, offset));
         
         offset += entrySize;
       }
@@ -70,42 +71,44 @@ export class Directory {
     return locations;
   }
   
-  private static directoryEntry(buffer: Buffer, offset: number): DirectoryEntry {
-    const entryNameLength = buffer.readUInt16LE(offset + 64);
-    const entryName = buffer.toString('utf16le', offset, offset + entryNameLength - 1);
+  private static directoryEntry(view: DataView, offset: number): DirectoryEntry {
+    const entryNameLength = view.getUint16(offset + 64, true);
+    const entryName = entryNameLength > 0 
+      ? TEXT_DECODER.decode(new DataView(view.buffer, offset, entryNameLength - 2))
+      : "";
     offset += 66;
   
-    const objectType = buffer.readUInt8(offset) as ObjectType;
+    const objectType = view.getUint8(offset) as ObjectType;
     offset += 1;
   
-    const colorFlag = buffer.readUInt8(offset) as ColorFlag;
+    const colorFlag = view.getUint8(offset) as ColorFlag;
     offset += 1;
   
-    const leftSiblingId = buffer.readUInt32LE(offset);
+    const leftSiblingId = view.getUint32(offset, true);
     offset += 4;
   
-    const rightSiblingId = buffer.readUInt32LE(offset);
+    const rightSiblingId = view.getUint32(offset, true);
     offset += 4;
   
-    const childId = buffer.readUInt32LE(offset);
+    const childId = view.getUint32(offset, true);
     offset += 4;
     
-    const clsid = readGUID(buffer, offset);
+    const clsid = "";
     offset += 16;
   
-    const stateBits = buffer.readUInt32LE(offset);
+    const stateBits = view.getUint32(offset, true);
     offset += 4;
   
-    const creationTime = buffer.readBigUInt64LE(offset);
+    const creationTime = view.getBigUint64(offset, true);
     offset += 8;
   
-    const modifiedTime = buffer.readBigUInt64LE(offset);
+    const modifiedTime = view.getBigUint64(offset, true);
     offset += 8;
   
-    const startingSectorLocation = buffer.readUInt32LE(offset);
+    const startingSectorLocation = view.getUint32(offset, true);
     offset += 4;
   
-    const streamSize = buffer.readBigUInt64LE(offset);
+    const streamSize = view.getBigUint64(offset, true);
     offset += 8;
   
     return {

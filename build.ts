@@ -4,7 +4,7 @@ Bun.build({
   entrypoints: ["./index.html"],
   outdir: "./build",
   minify: true,
-  plugins: [html({
-    inline: true
-  })]
+  plugins: [
+    html({ inline: true }),
+  ]
 });

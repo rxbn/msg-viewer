@@ -1,11 +1,24 @@
-import { parse } from './lib/msg/msg-parser';
+import { parse } from "./lib/msg/msg-parser";
 
-const filePath = (folder: string, type: string) => `resources/${folder}/${Bun.argv[2]}.${type}`;
-const file = Bun.file(filePath("inputs", "msg"));
+const $file = document.querySelector("#file");
 
-file.arrayBuffer().then((arrayBuffer) => {
-  const startTime = performance.now();
-  const message = parse(Buffer.from(arrayBuffer));
-  console.log(`Took: ${( performance.now() - startTime)} ms`);
+$file!.addEventListener("change", async (event) => {
+  const target = event.target as HTMLInputElement;
+  if (target?.files?.length === 0) return;
+
+  const arrayBuffer = await target.files![0].arrayBuffer();
+  const message = parse(new DataView(arrayBuffer));
   console.log(message);
 });
+
+// Download attachment example: 
+/**
+ * 
+ * const blob = new Blob([message.attachments[0].content], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = message.attachments[0].displayName;
+  a.click();
+ */

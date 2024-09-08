@@ -8,7 +8,7 @@ import { streamSectorOffset } from "./util";
 
 export class CompoundFile {
   constructor(
-    public readonly buffer: Buffer, 
+    public readonly view: DataView, 
     public readonly header: Header,
     public readonly difat: number[],
     public readonly fat: number[],
@@ -16,13 +16,13 @@ export class CompoundFile {
     public readonly directory: Directory,
   ) {}
   
-  static create(buffer: Buffer) {
-    const header = getHeader(buffer);
-    const difat = getDifat(buffer, header);
-    const fat = getFat(buffer, header, difat);
-    const miniFat = getMiniFat(buffer, header, fat);
-    const directory = Directory.getDirectory(buffer, header, fat);
-    return new CompoundFile(buffer, header, difat, fat, miniFat, directory);
+  static create(view: DataView) {
+    const header = getHeader(view);
+    const difat = getDifat(view, header);
+    const fat = getFat(view, header, difat);
+    const miniFat = getMiniFat(view, header, fat);
+    const directory = Directory.getDirectory(view, header, fat);
+    return new CompoundFile(view, header, difat, fat, miniFat, directory);
   }
 
   readStream(

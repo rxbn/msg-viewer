@@ -1,11 +1,13 @@
 import { CompoundFile } from "../compound-file/compound-file";
+import { TEXT_DECODER } from "../compound-file/constants/text-decoder";
 import type { DirectoryEntry } from "../compound-file/directory/types/directory-entry";
 import { ATTACH_PROPERTIES, RECIP_PROPERTIES, ROOT_PROPERTIES, type Property } from "./streams/property/properties";
 import { PtypBinary, PtypString, type PropertyType } from "./streams/property/property-types";
 import type { Attachment, Message, MessageContent, Recipient } from "./types/message";
 
-export function parse(buffer: Buffer): Message {
-  const file = CompoundFile.create(buffer);
+export function parse(view: DataView): Message {
+  const file = CompoundFile.create(view);
+
   return { 
     content: getContent(file), 
     attachments: getAttachments(file), 
@@ -53,13 +55,22 @@ function getValueForType(file: CompoundFile, entry: DirectoryEntry, type: Proper
   switch (type) {
     case PtypString: {
       let value = "";
-      file.readStream(entry, (offset, bytes) => value += file.buffer.toString("utf16le", offset, offset + bytes));
+      file.readStream(entry, (offset, bytes) => {
+        value += TEXT_DECODER.decode(new DataView(file.view.buffer, offset, bytes));
+      });
+
       return value;
     };
     case PtypBinary: {
-      const chunks: Buffer[] = [];
-      file.readStream(entry, (offset, bytes) => chunks.push(file.buffer.subarray(offset, offset + bytes)));
-      return Buffer.concat(chunks);
+      const chunks = new Uint8Array(Number(entry.streamSize));
+      let pos = 0;
+      file.readStream(entry, (offset, bytes) => {
+        const chunk = file.view.buffer.slice(offset, offset + bytes);
+        chunks.set(new Uint8Array(chunk), pos);
+        pos += bytes;
+      });
+
+      return new DataView(chunks.buffer);
     };
     default: return null;
   };
