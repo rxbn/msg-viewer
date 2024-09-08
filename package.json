@@ -9,7 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "bun-plugin-html": "^2.0.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

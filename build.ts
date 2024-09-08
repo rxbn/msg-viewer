@@ -1,6 +1,10 @@
+import html from 'bun-plugin-html';
+
 Bun.build({
-  entrypoints: ["./index.ts"],
+  entrypoints: ["./index.html"],
   outdir: "./build",
   minify: true,
-  plugins: []
+  plugins: [html({
+    inline: true
+  })]
 });
