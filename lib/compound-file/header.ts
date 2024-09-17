@@ -110,7 +110,7 @@ export function getHeader(view: DataView): Header {
   const difat: number[] = [];
   for (let i = 0; i < 436; i += 4) {
     const fat = view.getUint32(offset, true);
-    if (fat == 0xFFFFFFFF || fat == 0) break;
+    if (fat == 0xFFFFFFFF) break;
     
     difat.push(fat);
     offset += 4;
