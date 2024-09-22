@@ -1,12 +1,14 @@
-import { CompoundFile } from "../compound-file/compound-file";
-import { TEXT_DECODER } from "../compound-file/constants/text-decoder";
-import type { DirectoryEntry } from "../compound-file/directory/types/directory-entry";
+import { CompoundFile } from "./compound-file/compound-file";
+import { TEXT_DECODER } from "./compound-file/constants/text-decoder";
+import type { DirectoryEntry } from "./compound-file/directory/types/directory-entry";
 import { ATTACH_PROPERTIES, RECIP_PROPERTIES, ROOT_PROPERTIES, type Property } from "./streams/property/properties";
 import { PtypBinary, PtypString, type PropertyType } from "./streams/property/property-types";
 import type { Attachment, Message, MessageContent, Recipient } from "./types/message";
 
 export function parse(view: DataView): Message {
   const file = CompoundFile.create(view);
+
+  console.log(file);
 
   return { 
     content: getContent(file), 

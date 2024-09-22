@@ -22,6 +22,8 @@ export class CompoundFile {
     const fat = getFat(view, header, difat);
     const miniFat = getMiniFat(view, header, fat);
     const directory = Directory.getDirectory(view, header, fat);
+
+    directory.print();
     return new CompoundFile(view, header, difat, fat, miniFat, directory);
   }
 

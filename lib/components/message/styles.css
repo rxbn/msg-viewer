@@ -1,0 +1,43 @@
+.msg-header { 
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+}
+
+.msg-header-row {
+  display: flex;
+  gap: 10px;
+}
+
+.msg-avatar img {
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+}
+
+.msg-h-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.msg-date {
+  color: rgb(168, 168, 168);
+  font-size: 0.9em;
+}
+
+.msg-recip {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 1fr auto;
+  column-gap: 5px;
+}
+
+.msg-content {
+  overflow: auto;
+  background: #24262b;
+  padding: 15px 20px;
+  flex: 1;
+}

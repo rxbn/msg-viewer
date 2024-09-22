@@ -1,5 +1,5 @@
-import type { CompoundFile } from "../../../compound-file/compound-file";
-import type { DirectoryEntry } from "../../../compound-file/directory/types/directory-entry";
+import type { CompoundFile } from "../../compound-file/compound-file";
+import type { DirectoryEntry } from "../../compound-file/directory/types/directory-entry";
 import { PROPERTY_TYPES } from "./property-types";
 import type { PropertyHeader } from "./types/property-header";
 import type { PropertyData } from "./types/property-data";
