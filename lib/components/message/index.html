@@ -1,7 +1,7 @@
 <div class="msg-header">
   <h2>{{ title }}</h2>
   <div class="msg-divider"></div>
-  <div class="msg-sender">
+  <div class="flex-col">
     <span class="msg-name"><span class="color-text-2">From:</span> {{ name }}</span>
     <span class="msg-date color-text-2">{{ date }}</span>
   </div>
@@ -9,7 +9,7 @@
     <span class="color-text-2">To:</span><div>{{ toRecipients }}</div>
     <span class="color-text-2">Cc:</span><div>{{ ccRecipients }}</div>
   </div>
-  <div class="msg-attach">
+  <div class="flex-col">
     <span class="color-text-2">Attachments:</span>
     <div>{{ attachments }}</div>
   </div>

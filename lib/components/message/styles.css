@@ -1,35 +1,15 @@
 .msg-header {
-  --padding: 16px;
+  --h-padding: 16px;
 
-  display: flex;
+  display: flex;  
   flex-direction: column;
   gap: 16px;
-  padding: var(--padding);
-}
-
-.msg-sender {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  padding: var(--h-padding) var(--h-padding)  0;
 }
 
 .msg-divider {
-  margin: 0px calc(-1 * var(--padding));
+  margin: 0px calc(-1 * var(--h-padding));
   border-bottom: 1px solid white;
-}
-
-.img {
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  display: block;
-}
-
-.msg-h-info {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
 }
 
 .msg-date {

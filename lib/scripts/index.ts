@@ -4,6 +4,8 @@ import { parse } from "./msg/msg-parser";
 import messageHTML from "../components/message/index.html" with { type: "text" };
 // @ts-ignore
 import recipientHTML from "../components/recipient/index.html" with { type: "text" };
+// @ts-ignore
+import attachmentHTML from "../components/attachment/index.html" with { type: "text" };
 
 const $file = document.getElementById("file")!;
 
@@ -40,7 +42,8 @@ export interface MessageViewModel {
   date: string,
   rawContent: string,
   toRecipients: string,
-  ccRecipients: string
+  ccRecipients: string,
+  attachments: string
 }
 
 // TODO: Refactor this code
@@ -68,17 +71,24 @@ async function handleFiles(files: FileList) {
     }
 
     const toModel = to.map(recipient => {
+      const r = { name: recipient.name, email: recipient.email ? `&lt;${recipient.email}&gt;` : "" };
       return (recipientHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
-        const r = { name: recipient.name, email: recipient.email ? `&lt;${recipient.email}&gt;` : "" };
         return r[key.trim() as keyof typeof r];
       })
     });
 
     const ccModel = cc.map(recipient => {
+      const r = { name: recipient.name, email: recipient.email ? `&lt;${recipient.email}&gt;` : "" };
       return (recipientHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
-        const r = { name: recipient.name, email: recipient.email ? `&lt;${recipient.email}&gt;` : "" };
         return r[key.trim() as keyof typeof r];
       })
+    });
+
+    const attachments = message.attachments.map(attachment => {
+      const a = { name: attachment.displayName, size: niceBytes(attachment.content.byteLength).toString() };
+      return (attachmentHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
+        return a[key.trim() as keyof typeof a];
+      });
     });
 
     const model: MessageViewModel = {
@@ -97,7 +107,8 @@ async function handleFiles(files: FileList) {
       }),
       rawContent: message.content.body,
       toRecipients: toModel.join("; "),
-      ccRecipients: ccModel.join("; ")
+      ccRecipients: ccModel.join("; "),
+      attachments: attachments.join("")
     };
 
     const html = (messageHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
@@ -111,6 +122,17 @@ async function handleFiles(files: FileList) {
   }
 }
 
+const units = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+   
+function niceBytes(n: number){
+  let l = 0;
+  while(n >= 1024){
+    n = n / 1024;
+    l++;
+  }
+  
+  return(n.toFixed(n < 10 && l > 0 ? 1 : 0) + ' ' + units[l]);
+}
 
 // Download attachment example: 
 /**
