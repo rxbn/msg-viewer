@@ -69,14 +69,14 @@ async function handleFiles(files: FileList) {
 
     const toModel = to.map(recipient => {
       return (recipientHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
-        const r = { name: recipient.name, email: recipient.email };
+        const r = { name: recipient.name, email: recipient.email ? `&lt;${recipient.email}&gt;` : "" };
         return r[key.trim() as keyof typeof r];
       })
     });
 
     const ccModel = cc.map(recipient => {
       return (recipientHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
-        const r = { name: recipient.name, email: recipient.email };
+        const r = { name: recipient.name, email: recipient.email ? `&lt;${recipient.email}&gt;` : "" };
         return r[key.trim() as keyof typeof r];
       })
     });
