@@ -1,6 +1,9 @@
 import { parse } from "./msg/msg-parser";
 
-import emailHTML from "../components/message/index.html" with { type: "text" };
+// @ts-ignore
+import messageHTML from "../components/message/index.html" with { type: "text" };
+// @ts-ignore
+import recipientHTML from "../components/recipient/index.html" with { type: "text" };
 
 const $file = document.getElementById("file")!;
 
@@ -40,7 +43,7 @@ export interface MessageViewModel {
   ccRecipients: string
 }
 
-
+// TODO: Refactor this code
 async function handleFiles(files: FileList) {
   for (let i = 0; i < files.length; i++) {
     const arrayBuffer = await files[i].arrayBuffer();
@@ -50,17 +53,54 @@ async function handleFiles(files: FileList) {
     if (message.content.senderEmail) {
       name += ` &lt;${message.content.senderEmail}&gt;`;
     }
+    
+    const toRecipients = new Set(message.content.toRecipients.endsWith('\x00') ? message.content.toRecipients.slice(0, -1).split("; ") : message.content.toRecipients.split("; "));
+    const ccRecipients = new Set(message.content.ccRecipients.endsWith('\x00') ? message.content.ccRecipients.slice(0, -1).split("; ") : message.content.ccRecipients.split("; "));
+
+    const to = [];
+    const cc = [];
+    for (const recipient of message.recipients) {
+      if (toRecipients.has(recipient.name)) {
+        to.push(recipient);
+      } else if (ccRecipients.has(recipient.name)) {
+        cc.push(recipient);
+      }
+    }
+
+    const toModel = to.map(recipient => {
+      return (recipientHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
+        const r = { name: recipient.name, email: recipient.email };
+        return r[key.trim() as keyof typeof r];
+      })
+    });
+
+    const ccModel = cc.map(recipient => {
+      return (recipientHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
+        const r = { name: recipient.name, email: recipient.email };
+        return r[key.trim() as keyof typeof r];
+      })
+    });
 
     const model: MessageViewModel = {
       title: message.content.subject,
       name: name,
-      date: "04/03/2024 09:23",
+      date: message.content.date.toLocaleString('en-US', {
+        weekday: "short",
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: "UTC",
+        timeZoneName: "short"
+      }),
       rawContent: message.content.body,
-      toRecipients: "<span> First Name Last Name </span>",
-      ccRecipients: "<span> First Name Last Name </span>"
-    }
+      toRecipients: toModel.join("; "),
+      ccRecipients: ccModel.join("; ")
+    };
 
-    const html = (emailHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
+    const html = (messageHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
       return model[key.trim() as keyof typeof model];
     });
 
@@ -70,15 +110,6 @@ async function handleFiles(files: FileList) {
     $msg.innerHTML = html;
   }
 }
-
-
-
-
-
-
-
-
-
 
 
 // Download attachment example: 

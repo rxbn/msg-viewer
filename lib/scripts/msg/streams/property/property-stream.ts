@@ -13,33 +13,42 @@ export function getPropertyStreamEntry(file: CompoundFile, folder: DirectoryEntr
   if (!entry) return null;
 
   let header;
-  const data: PropertyData[] = [];
+  const data = new Map();
   file.readStream(entry,
-    (offset) => data.push(getProperty(file.buffer, offset)),
+    (offset) => {
+      const property = getProperty(file.view, offset);
+      data.set(property.propertyId.toString(16).toLowerCase().padStart(4, "0"), property);
+    },
     DATA_SIZE,
     (offset) => {
-      header = getHeader(file.buffer, offset, folder.entryName);
+      header = getHeader(file.view, offset, folder.entryName);
       return header.size;
     }
   );
 
-  return { header: header!, data };
+  return { header: header!, data: data };
 }
 
-function getProperty(buffer: Buffer, offset: number): PropertyData {
-  const propertyType = PROPERTY_TYPES[buffer.readUInt16LE(offset)];
-  offset += 2;
+function getProperty(view: DataView, offset: number): PropertyData {
+  const propertyTag = view.getUint32(offset, true);
+  const propertyType = PROPERTY_TYPES[propertyTag & 0xFFFF];
+  const propertyId = propertyTag >>> 16;
 
-  const propertyId = buffer.readUInt16LE(offset);
-  offset += 2;
-  
-  const flags = buffer.readUInt32LE(offset);
   offset += 4;
-
-  const valueOrSize = (!propertyType?.size || propertyType?.multi)
-    ? buffer.readUInt32LE(offset)
-    : buffer.toString("hex", offset, offset + propertyType.size);  
   
+  const flags = view.getUint32(offset, true);
+  offset += 4;
+  
+  const valueOrSize = (!propertyType?.size || propertyType?.multi)
+    ? view.getUint32(offset, true)
+    : (propertyType.size == 1) 
+      ? view.getUint8(offset)
+      : propertyType.size == 2
+        ? view.getUint16(offset, true)
+        : propertyType.size == 4
+          ? view.getUint32(offset, true)
+          : view.getBigUint64(offset, true);
+
   return {
     propertyType,
     propertyId,
@@ -48,7 +57,7 @@ function getProperty(buffer: Buffer, offset: number): PropertyData {
   };
 }
 
-function getHeader(buffer: Buffer, offset: number, folderName: string): PropertyHeader {
+function getHeader(view: DataView, offset: number, folderName: string): PropertyHeader {
   if (["__attach", "__recip"].some(v => folderName.startsWith(v))) return { size: 8 };
 
   const initialOffset = offset;
@@ -56,16 +65,16 @@ function getHeader(buffer: Buffer, offset: number, folderName: string): Property
   // Reserved (8 bytes): This field MUST be set to zero when writing a .msg file and MUST be ignored when reading a .msg file.
   offset += 8;
 
-  const nextRecipientId = buffer.readUInt32LE(offset);
+  const nextRecipientId = view.getUint32(offset, true);
   offset += 4;
 
-  const nextAttachmentId = buffer.readUInt32LE(offset)
+  const nextAttachmentId = view.getUint32(offset, true);
   offset += 4;
 
-  const recipientCount = buffer.readUInt32LE(offset);
+  const recipientCount = view.getUint32(offset, true);
   offset += 4;
 
-  const attachmentCount = buffer.readUInt32LE(offset)
+  const attachmentCount = view.getUint32(offset, true);
   offset += 4;
   
   if (folderName.startsWith("Root")) {

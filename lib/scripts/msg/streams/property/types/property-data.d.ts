@@ -45,5 +45,5 @@ export interface PropertyData {
    *   Size (4 bytes): This value is interpreted based on the property type, which is specified in the Property Tag field. If the message contains an embedded message attachment or a storage attachment, this field MUST be set to 0xFFFFFFFF. Otherwise, the following table shows how this field is interpreted for each property type. The property types are specified in [MS-OXCDATA] section 2.11.1.
    *   Reserved (4 bytes): This field MUST be ignored when reading a .msg file. 
    */
-  valueOrSize: number | string,
+  valueOrSize: number | bigint,
 }

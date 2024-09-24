@@ -3,5 +3,5 @@ import type { PropertyData } from "./property-data";
 
 export interface PropertyStreamEntry {
   header: PropertyHeader,
-  data: PropertyData[]
+  data: Map<string, PropertyData>
 }

@@ -1,25 +1,17 @@
 <div class="msg-header">
   <h2>{{ title }}</h2>
-  <div class="msg-header-row">
-    <div class="msg-avatar">
-      <img src="{{ avatar }}" alt="icon">
-    </div>
-    <div class="msg-h-info">
-      <span class="msg-name">{{ name }}</span>
-      <span class="msg-date">{{ date }}</span>
-      <div class="msg-recip">
-        <span>To:</span>
-        <div>{{ toRecipients }}</div>
-        <span>Cc:</span>
-        <div>{{ ccRecipients }}</div>
-      </div>
-    </div>
+  <div class="msg-divider"></div>
+  <div class="msg-sender">
+    <span class="msg-name"><span class="color-text-2">From:</span> {{ name }}</span>
+    <span class="msg-date color-text-2">{{ date }}</span>
+  </div>
+  <div class="msg-recip">
+    <span class="color-text-2">To:</span><div>{{ toRecipients }}</div>
+    <span class="color-text-2">Cc:</span><div>{{ ccRecipients }}</div>
   </div>
   <div class="msg-attach">
-    <span>Attachments:</span>
+    <span class="color-text-2">Attachments:</span>
     <div>{{ attachments }}</div>
   </div>
 </div>
-<div class="msg-content">
-  <pre>{{ rawContent }}</pre>
-</div>
+<pre class="msg-content">{{ rawContent }}</pre>

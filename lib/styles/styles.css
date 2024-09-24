@@ -1,4 +1,4 @@
-@import "./lib/components/message/styles.css";
+@import "./lib/components/styles.css";
 
 * {
   box-sizing: border-box;
@@ -10,6 +10,10 @@
   font-size: 18px;
 }
 
+.color-text-2 {
+  color: rgb(168, 168, 168);
+}
+
 body {
   background: rgb(36, 38, 43);        
   color: white;
@@ -19,7 +23,7 @@ body {
 
 #root {  
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 5fr);
+  grid-template-columns: 2fr 5fr;
   grid-gap: 10px;
   height: 100vh;
   padding: 24px;
@@ -82,7 +86,7 @@ body {
 @media (max-width: 480px) {
   #root {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) minmax(0, 3fr);
+    grid-template-rows: 1fr 3fr;
   }
 
   #msg {

@@ -1,20 +1,29 @@
-.msg-header { 
+.msg-header {
+  --padding: 16px;
+
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 18px;
+  gap: 16px;
+  padding: var(--padding);
 }
 
-.msg-header-row {
+.msg-sender {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 5px;
 }
 
-.msg-avatar img {
+.msg-divider {
+  margin: 0px calc(-1 * var(--padding));
+  border-bottom: 1px solid white;
+}
+
+.img {
   border-radius: 50%;
   width: 60px;
   height: 60px;
   object-fit: cover;
+  display: block;
 }
 
 .msg-h-info {
@@ -24,7 +33,6 @@
 }
 
 .msg-date {
-  color: rgb(168, 168, 168);
   font-size: 0.9em;
 }
 
@@ -40,4 +48,5 @@
   background: #24262b;
   padding: 15px 20px;
   flex: 1;
+  white-space: pre-wrap;
 }

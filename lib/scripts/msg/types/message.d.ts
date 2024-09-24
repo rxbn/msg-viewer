@@ -5,6 +5,7 @@ export interface Message {
 }
 
 export interface MessageContent {
+  date: Date,
   subject: string,
   senderName: string,
   senderEmail: string,
@@ -12,6 +13,8 @@ export interface MessageContent {
   bodyHTML: string,
   bodyRTF: Buffer,
   headers: string,
+  toRecipients: string,
+  ccRecipients: string
 }
 
 export interface Attachment {
