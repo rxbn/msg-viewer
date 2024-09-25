@@ -85,7 +85,10 @@ async function handleFiles(files: FileList) {
     });
 
     const attachments = message.attachments.map(attachment => {
-      const a = { name: attachment.displayName, size: niceBytes(attachment.content.byteLength).toString() };
+      const blob = new Blob([attachment.content], { type: 'application/octet-stream' });
+      const url = URL.createObjectURL(blob);
+
+      const a = { name: attachment.displayName, size: niceBytes(attachment.content.byteLength).toString(), url: url };
       return (attachmentHTML as string).replace(/{{(.*?)}}/g, (_m: string, key: string) => {
         return a[key.trim() as keyof typeof a];
       });
@@ -133,15 +136,3 @@ function niceBytes(n: number){
   
   return(n.toFixed(n < 10 && l > 0 ? 1 : 0) + ' ' + units[l]);
 }
-
-// Download attachment example: 
-/**
- * 
- * const blob = new Blob([message.attachments[0].content], { type: 'application/octet-stream' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = message.attachments[0].displayName;
-  a.click();
- */
