@@ -24,9 +24,14 @@
 }
 
 .msg-content {
-  overflow: auto;
   background: #24262b;
   padding: 15px 20px;
   flex: 1;
   white-space: pre-wrap;
+}
+
+.msg-attachs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
 }
