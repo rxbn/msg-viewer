@@ -6,5 +6,5 @@ Bun.build({
   minify: true,
   plugins: [
     html({ inline: true }),
-  ]
+  ],
 });
