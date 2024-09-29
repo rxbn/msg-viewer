@@ -24,8 +24,11 @@
   cursor: pointer;
   background-color: #235b8d;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  width: 100%;
   padding: 16px;
+}
+
+.btn-2 {
+  background-color: #1d5c56;
 }
 
 .btn:hover {
