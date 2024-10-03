@@ -29,7 +29,7 @@ function getName(content: MessageContent): string {
 }
 
 function getDate(content: MessageContent): string {
-  return content.date.toLocaleString('en-US', {
+  return content.date?.toLocaleString('en-US', {
     weekday: "short",
     month: '2-digit',
     day: '2-digit',
@@ -39,7 +39,7 @@ function getDate(content: MessageContent): string {
     hour12: false,
     timeZone: "UTC",
     timeZoneName: "short"
-  });
+  }) ?? "";
 }
 
 interface MessageViewModel {
