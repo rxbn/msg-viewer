@@ -1,5 +1,6 @@
 import { parse } from "./msg/msg-parser";
 import { messageHTML } from "../components/message";
+import { errorHTML } from "../components/error";
 
 const $file = document.getElementById("file")!;
 
@@ -26,8 +27,15 @@ target.addEventListener("drop", (event) => {
 
 async function updateMessage(files: FileList) {
   const arrayBuffer = await files[0].arrayBuffer();
-  const message = parse(new DataView(arrayBuffer));
-
   const $msg = document.getElementById("msg")!;
-  $msg.innerHTML = messageHTML(message);
+  let html = "";
+
+  try {
+    const message = parse(new DataView(arrayBuffer));
+    html = messageHTML(message);
+  } catch (e) {
+    html = errorHTML(`An error occured during the parsing of the .msg file. Error: ${e}`);
+  }
+
+  $msg.innerHTML = html;
 }
