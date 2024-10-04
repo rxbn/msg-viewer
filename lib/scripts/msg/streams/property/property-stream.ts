@@ -31,7 +31,7 @@ export function getPropertyStreamEntry(file: CompoundFile, folder: DirectoryEntr
 
 function getProperty(view: DataView, offset: number): PropertyData {
   const propertyTag = view.getUint32(offset, true);
-  const propertyType = PROPERTY_TYPES[propertyTag & 0xFFFF];
+  const propertyType = PROPERTY_TYPES[0xFFFF & propertyTag];
   const propertyId = propertyTag >>> 16;
 
   offset += 4;
