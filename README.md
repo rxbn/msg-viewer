@@ -18,7 +18,15 @@ At work, I needed to read a .msg file. Since I use a Mac, I quickly realized tha
   - Extremely Fast;
   - Works on any device that can open the page.
 
-### Development notes
+### Development
+#### Build
+The project uses Bun. To build it simply run:
+```
+bun .\build.ts
+```
+The command will put a final HTML in `build` folder.
+
+#### Branches
 The page is hosted via Cloudfare. There are multiple branches for the preview and production.
 Branches:
  - dev - for development and corresponds to Preview in Cloudfare
