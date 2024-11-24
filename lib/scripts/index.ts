@@ -1,6 +1,6 @@
-import { parse } from "./msg/msg-parser";
 import { messageHTML } from "../components/message";
 import { errorHTML } from "../components/error";
+import { parse } from "@molotochok/msg-viewer";
 
 const $file = document.getElementById("file")!;
 

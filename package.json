@@ -1,7 +1,7 @@
 {
-  "name": "msg-viewer",
+  "name": "msg-viewer-ui",
   "version": "1.0.0",
-  "author": "",
+  "author": "Markiian Karpa",
   "main": "index.js",
   "devDependencies": {
     "@types/bun": "latest",
@@ -10,9 +10,8 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "description": "",
-  "license": "ISC",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "license": "MIT",
+  "dependencies": {
+    "@molotochok/msg-viewer": "^1.0.1"
   }
 }
