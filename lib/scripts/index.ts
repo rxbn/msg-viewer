@@ -34,6 +34,10 @@ async function updateMessage(files: FileList) {
     const message = parse(new DataView(arrayBuffer));
     html = messageHTML(message);
   } catch (e) {
+    window.gtag('event', 'exception', {
+      'description': e,
+      'fatal': true
+    });
     html = errorHTML(`An error occured during the parsing of the .msg file. Error: ${e}`);
   }
 
