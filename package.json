@@ -13,5 +13,8 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@molotochok/msg-viewer": "^1.0.3"
+  }
 }
