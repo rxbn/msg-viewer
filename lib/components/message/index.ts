@@ -30,7 +30,7 @@ export function messageFragment(message: Message, renderDir: (dir: DirectoryEntr
 
     const lastChild = $container.lastChild as HTMLElement;
     if (lastChild) {
-      lastChild.style.display = "block";
+      lastChild.classList.remove("hidden");
     }
   });
 

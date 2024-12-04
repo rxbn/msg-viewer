@@ -48,7 +48,7 @@ function renderMessage($msg: HTMLElement, getMessage: () => Message, updateDom: 
         (fragment) => {
           for (let i = 0; i < $msg.children.length; i++) {
             const child = $msg.children[i] as HTMLElement;
-            child.style.display = "none";
+            child.classList.add("hidden");
           };
           $msg.appendChild(fragment)
         }
