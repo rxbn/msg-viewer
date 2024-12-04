@@ -1,4 +1,4 @@
-import { PtypBinary, PtypString, PtypTime, type PropertyType } from "./property-types";
+import { PtypBinary, PtypObject, PtypString, PtypTime, type PropertyType } from "./property-types";
 
 export const enum PropertySource { 
   Stream, // Property can be found in a dedicated stream
@@ -25,6 +25,7 @@ export const ATTACH_PROPERTIES: Property[]= [
   { id: "3A0C", name:"language", type: PtypString, source: PropertySource.Stream },
   { id: "3001", name:"displayName", type: PtypString, source: PropertySource.Stream },
   { id: "3701", name:"content", type: PtypBinary, source: PropertySource.Stream },
+  { id: "3701", name:"embeddedMsgObj", type: PtypObject, source: PropertySource.Stream },
 ];
 
 export const RECIP_PROPERTIES: Property[] = [

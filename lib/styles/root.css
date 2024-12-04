@@ -13,6 +13,12 @@
   color: rgb(168, 168, 168);
 }
 
+.flex-b {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .flex-col {
   display: flex;
   flex-direction: column;
@@ -20,6 +26,7 @@
 }
 
 .btn {
+  all: unset;
   border-radius: 6px;
   cursor: pointer;
   background-color: #235b8d;
@@ -27,12 +34,18 @@
   padding: 16px;
 }
 
-.btn-2 {
-  background-color: #1d5c56;
-}
-
 .btn:hover {
   opacity: 0.8;
+}
+
+.btn-2 {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  width: fit-content;
+  align-items: center;
+  color: white;
+  text-decoration: none;
 }
 
 /* Per element */

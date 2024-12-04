@@ -1,3 +1,8 @@
+.msg {
+  min-height: 100%;
+  height: fit-content;
+}
+
 .msg-header {
   --h-padding: 16px;
 
@@ -5,6 +10,14 @@
   flex-direction: column;
   gap: 16px;
   padding: var(--h-padding) var(--h-padding)  0;
+}
+
+.msg-close-btn {
+  padding: 0;
+  background-color: #b42020;
+}
+.msg-close-btn svg {
+  display: block; 
 }
 
 .msg-divider {
@@ -16,7 +29,7 @@
   font-size: 0.9em;
 }
 
-.msg-recip {
+.msg-recip-section {
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: 1fr auto;

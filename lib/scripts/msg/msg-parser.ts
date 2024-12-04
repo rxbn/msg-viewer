@@ -3,39 +3,45 @@ import { TEXT_DECODER } from "./compound-file/constants/text-decoder";
 import type { DirectoryEntry } from "./compound-file/directory/types/directory-entry";
 import { ATTACH_PROPERTIES, PropertySource, RECIP_PROPERTIES, ROOT_PROPERTIES, type Property } from "./streams/property/properties";
 import { getPropertyStreamEntry } from "./streams/property/property-stream";
-import { PtypBinary, PtypString, PtypTime, type PropertyType } from "./streams/property/property-types";
+import { PtypBinary, PtypObject, PtypString, PtypTime, type PropertyType } from "./streams/property/property-types";
 import type { PropertyStreamEntry } from "./streams/property/types/property-stream-entry";
 import type { Attachment, Message, MessageContent, Recipient } from "./types/message";
 
 export function parse(view: DataView): Message {
   const file = CompoundFile.create(view);
+  const dir = file.directory.entries[0];
 
-  const pStreamEntry = getPropertyStreamEntry(file, file.directory.entries[0])!;
+  return parseDir(file, dir);
+}
+
+export function parseDir(file: CompoundFile, dir: DirectoryEntry): Message {
+  const pStreamEntry = getPropertyStreamEntry(file, dir)!;
 
   return { 
-    content: getContent(file, pStreamEntry), 
-    attachments: getAttachments(file), 
-    recipients: getRecipients(file),
+    file: file,
+    content: getContent(file, dir, pStreamEntry), 
+    attachments: getAttachments(file, dir),
+    recipients: getRecipients(file, dir),
   };
 }
 
-function getContent(file: CompoundFile, pStreamEntry: PropertyStreamEntry): MessageContent {
-  return getValue(file, ROOT_PROPERTIES, file.directory.entries[0], pStreamEntry);
+function getContent(file: CompoundFile, dir: DirectoryEntry, pStreamEntry: PropertyStreamEntry): MessageContent {
+  return getValue(file, ROOT_PROPERTIES, dir, pStreamEntry);
 }
 
-function getRecipients(file: CompoundFile): Recipient[] {
-  return getValues(file, RECIP_PROPERTIES, "recip");
+function getRecipients(file: CompoundFile, dir: DirectoryEntry): Recipient[] {
+  return getValues(file, dir, RECIP_PROPERTIES, "recip");
 }
 
-function getAttachments(file: CompoundFile): Attachment[] {
-  return getValues(file, ATTACH_PROPERTIES, "attach");
+function getAttachments(file: CompoundFile, dir: DirectoryEntry): Attachment[] {
+  return getValues(file, dir, ATTACH_PROPERTIES, "attach");
 }
 
-function getValues<T>(file: CompoundFile, properties: Property[], prefix: string): T[] {
+function getValues<T>(file: CompoundFile, dir: DirectoryEntry, properties: Property[], prefix: string): T[] {
   const list: T[] = [];
 
   for (let i = 0; i < 2048; i++) {
-    const directory = file.directory.get(`__${prefix}_version1.0_#${i.toString(16).padStart(8, "0")}`, file.directory.entries[0].childId, false);
+    const directory = file.directory.get(`__${prefix}_version1.0_#${i.toString(16).padStart(8, "0")}`, dir.childId, false);
     if (!directory) break;
 
     const pStreamEntry = getPropertyStreamEntry(file, directory)!;
@@ -96,6 +102,9 @@ function getValueFromStream(file: CompoundFile, entry: DirectoryEntry, type: Pro
 
       return new DataView(chunks.buffer);
     };
+    case PtypObject: {
+      return entry;
+    }
     default: return null;
   };
 }

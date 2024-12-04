@@ -1,8 +1,8 @@
 import type { Message, Recipient } from "../../scripts/msg/types/message";
-import { fillHTMLTemplate } from "../../scripts/utils/html-template-util";
+import { createFragmentFromTemplate } from "../../scripts/utils/html-template-util";
 import template from "./index.html" with { type: "text" };
 
-export function recipientsHTMLs(message: Message): string[] {
+export function recipientsFragments(message: Message): DocumentFragment[] {
   const toRecipients = toSet(message.content.toRecipients);
   const ccRecipients = toSet(message.content.ccRecipients);
 
@@ -19,15 +19,19 @@ export function recipientsHTMLs(message: Message): string[] {
   return [recipientHTML(to), recipientHTML(cc)];
 }
 
-function recipientHTML(recipients: Recipient[]): string {
-  return recipients.map(recipient => {
+function recipientHTML(recipients: Recipient[]): DocumentFragment {
+  const recipFragments = recipients.map(recipient => {
     const model: RecipientViewModel = { 
       name: recipient.name, 
       email: recipient.email ? `&lt;${recipient.email}&gt;` : "" 
     };
 
-    return fillHTMLTemplate(template, model);
-  }).join("; ");
+    return createFragmentFromTemplate(template, model);
+  });
+
+  const fragment = document.createDocumentFragment();
+  fragment.append(...recipFragments);
+  return fragment;
 }
 
 function toSet(recipStr: string) {

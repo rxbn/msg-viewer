@@ -1,4 +1,5 @@
 export interface Message {
+  file: CompoundFile,
   content: MessageContent,
   attachments: Attachment[],
   recipients: Recipient[],
@@ -23,7 +24,8 @@ export interface Attachment {
   mimeType: string,
   language: string,
   displayName: string,
-  content: Buffer
+  content: Buffer,
+  embeddedMsgObj: DirectoryEntry
 }
 
 export interface Recipient {

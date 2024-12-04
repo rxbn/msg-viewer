@@ -1,6 +1,7 @@
-import { messageHTML } from "../components/message";
-import { errorHTML } from "../components/error";
-import { parse } from "@molotochok/msg-viewer";
+import { messageFragment } from "../components/message";
+import { errorFragment } from "../components/error";
+import { parse, parseDir } from "./msg/msg-parser";
+import type { Message } from "./msg/types/message";
 
 const $file = document.getElementById("file")!;
 
@@ -28,18 +29,32 @@ target.addEventListener("drop", (event) => {
 async function updateMessage(files: FileList) {
   const arrayBuffer = await files[0].arrayBuffer();
   const $msg = document.getElementById("msg")!;
-  let html = "";
+  renderMessage($msg, 
+    () => parse(new DataView(arrayBuffer)), 
+    (fragment) => $msg.replaceChildren(fragment)
+  );
+}
 
-  try {
-    const message = parse(new DataView(arrayBuffer));
-    html = messageHTML(message);
-  } catch (e) {
-    window.gtag('event', 'exception', {
-      'description': e,
-      'fatal': true
+function renderMessage($msg: HTMLElement, getMessage: () => Message, updateDom: (fragment: DocumentFragment) => void) {
+  let fragment: DocumentFragment;
+  try {    
+    const message = getMessage();
+    fragment = messageFragment(message, dir => {
+      renderMessage($msg,
+        () => parseDir(message.file, dir), 
+        (fragment) => {
+          for (let i = 0; i < $msg.children.length; i++) {
+            const child = $msg.children[i] as HTMLElement;
+            child.style.display = "none";
+          };
+          $msg.appendChild(fragment)
+        }
+      );
     });
-    html = errorHTML(`An error occured during the parsing of the .msg file. Error: ${e}`);
+  } catch (e) {
+    window.gtag('event', 'exception', { 'description': e, 'fatal': true });
+    fragment = errorFragment(`An error occured during the parsing of the .msg file. Error: ${e}`);
   }
 
-  $msg.innerHTML = html;
+  updateDom(fragment);
 }
