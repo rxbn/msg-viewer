@@ -11,6 +11,9 @@ $file.addEventListener("change", async (event) => {
   updateMessage(target.files!);
 });
 
+// To reset the file input
+$file.addEventListener("click", (event) => (event.target as HTMLInputElement).value = "");
+
 
 const target = document.documentElement;
 target.addEventListener("dragover", (event) => event.preventDefault());
