@@ -35,6 +35,8 @@ function recipientHTML(recipients: Recipient[]): DocumentFragment {
 }
 
 function toSet(recipStr: string) {
+  if (!recipStr) return new Set();
+  
   return new Set(recipStr.endsWith('\x00') 
     ? recipStr.slice(0, -1).split("; ")
     : recipStr.split("; "));
