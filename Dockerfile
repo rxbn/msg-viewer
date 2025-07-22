@@ -10,3 +10,5 @@ FROM httpd:latest
 
 COPY --from=builder /app/build /usr/local/apache2/htdocs/
 EXPOSE 80
+
+USER 1000
